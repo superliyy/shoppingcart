@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			ul, li{list-style: none;}
+			li {
+				width: 100px;
+				height: 250px;
+				border: 1px solid #ccc;
+				float: left;
+				margin-left: 10px;
+				cursor: pointer;
+			}
+			img {
+				width: 100px;
+				height: 100px;
+			}
+		</style>
+		<script type="text/javascript" src="js/jquery-1.12.3.js" ></script>
+		<script type="text/javascript" src="js/jquery.cookie.js" ></script>
+		<script>
+			$(function(){
+				
+				var myArr = [];
+				
+				//也可以在这里添加点击事件
+				$("#list").on("click", "a", function(){
+					console.log("点击了加入购物车");
+					
+					var index = $(this).index(".addToCart");
+					//console.log(index);
+					var goodsObj = myArr[index]; //当前点击的商品信息
+					
+					//数组
+					//如果第一次进入该页面(或者说第一次获取cart的cookie数据), 则该cookie数据是undefined, 否则是一个数组
+					var cartArr = $.cookie("cart") ? JSON.parse($.cookie("cart")) : [];
+					
+					//先判断是否已经存在该商品, 如果存在则把num++, 否则添加新商品
+					var isExist = false; //是否存在相同的商品
+					for (var i=0; i<cartArr.length; i++){
+						if (cartArr[i].id == goodsObj.id) {
+							//如果进入if, 则说明存在相同的商品
+							cartArr[i].num++;
+							isExist = true; //说明存在相同商品
+						}
+					}
+					
+					//如果不存在相同的商品 ,则添加新商品
+					if (isExist == false) {
+						goodsObj.num = 1;
+						cartArr.push(goodsObj);
+					}
+					//将arr序列化并存储到cookie中
+					$.cookie("cart", JSON.stringify(cartArr), {expires:30, path:"/"});
+					console.log( $.cookie("cart") ); 
+										
+				})
+				 
+				//获取商品数据
+				$.get("json/goods.json", function(arr){
+					myArr = arr;
+					
+					for (var i=0; i<arr.length; i++){
+						var obj = arr[i]; //每个商品的信息
+						
+						//创建li节点
+						var li = $("<li></li>");
+						li.appendTo("#list");
+						$("<img src="+ obj.image +" />").appendTo(li);
+						$("<p>"+ obj.name +"</p>").appendTo(li);
+						$("<p>"+ obj.price +"</p>").appendTo(li);
+						$("<a class='addToCart' href='#'>加入购物车</a>").appendTo(li);
+						
+					}
+					
+					//可以在这里添加点击事件
+				})
+				
+				
+				//结算
+				$("#gotoCart").click(function(){
+					location.href = "03_cart.html";
+				})
+				
+			})
+		</script>
+	</head>
+	<body>
+		<button id="gotoCart">结算</button>
+		<ul id="list">
+			<!--
+			<li>
+				<img src="images/1.jpg" />
+				<p>单车</p>
+				<p>1999</p>
+				<a class='addToCart' href='#'>加入购物车</a>
+			</li>
+			<li>
+				<img src="images/11.jpg" />
+				<p>摩托</p>
+				<p>9998</p>
+				<a class='addToCart' href='#'>加入购物车</a>
+			</li>
+			<li>
+				<img src="images/22.jpg" />
+				<p>兰博基尼</p>
+				<p>9999998</p>
+				<a class='addToCart' href='#'>加入购物车</a>
+			</li>
+			<li>
+				<img src="images/33.jpg" />
+				<p>飞机</p>
+				<p>199999998</p>
+				<a class='addToCart' href='#'>加入购物车</a>
+			</li>
+			-->
+		</ul>
+	</body>
+</html>

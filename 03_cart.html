@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			ul, li {list-style: none;}
+			img {
+				width: 40px; height: 30px;
+			}
+			.num {
+				width: 30px;
+				text-align: center;
+			}
+		</style>
+		<script type="text/javascript" src="js/jquery-1.12.3.js" ></script>
+		<script type="text/javascript" src="js/jquery.cookie.js" ></script>
+		<script>
+			$(function(){
+				
+				//
+				//console.log( $.cookie("cart") );
+				
+				//checkArr: 用来保存每个商品的选中状态
+				var checkedArr = [];
+				var arr = $.cookie("cart");
+				if (arr){
+					arr = JSON.parse(arr); //json解析
+					for (var i=0; i<arr.length; i++){
+						checkedArr.push(true);
+					}
+				}
+				
+				
+				refresh();			
+				//刷新页面: 清除旧的li, 再根据最新的cookie添加新的li
+				function refresh(){
+					//获取cookie中购物车的所有商品信息
+					var goodsArr = $.cookie("cart");
+					if (goodsArr) { //如果购物车cart有商品
+						
+						//JSON 解析
+						goodsArr = JSON.parse(goodsArr);
+						
+						//清除旧的li
+						$("#list").empty();
+						
+						//添加新li
+						//将cookie中的所有购物车商品添加到页面上
+						var total = 0; //保存总价
+						for (var i=0; i<goodsArr.length; i++){
+							var obj = goodsArr[i]; //购物车中的每个商品
+							
+							//创建节点
+							var li = $("<li></li>");
+							li.appendTo("#list");
+							if (checkedArr[i] == true){ //如果勾选状态为true, 则显示选中状态
+								$('<input class="check" type="checkbox" checked="checked" />').appendTo(li);
+							}
+							else {
+								$('<input class="check" type="checkbox" />').appendTo(li);
+							}
+							$('<img src='+ obj.image +' />').appendTo(li);
+							$('<span>'+ obj.name +'</span>').appendTo(li);
+							$('<span>'+ obj.unit + obj.price +'</span>').appendTo(li);
+							$('<input class="down" type="button" value="-" />').appendTo(li);
+							$('<input class="num" type="text" value='+ obj.num +' />').appendTo(li);
+							$('<input class="up" type="button" value="+" />').appendTo(li);
+							$('<a class="del" href="#">删除</a>').appendTo(li);
+							
+							//计算总价
+							if (checkedArr[i] == true){
+								total += obj.num * obj.price;
+							}
+						}
+//						console.log(total);
+						$("#total").html(total);
+					}
+				}
+				
+				//删除
+				$("#list").on("click", ".del", function(){
+					var index =  $(this).index(".del");
+					//console.log(index);
+					
+					//从cookie中获取最新的购物车数据
+					var arr = JSON.parse($.cookie("cart"));
+					arr.splice(index, 1); //删除数组arr的第index个
+					checkedArr.splice(index, 1); //删除checkArr中的第index个
+					
+					
+					//重新将修改后的arr保存到cookie中
+					$.cookie("cart", JSON.stringify(arr), {expires:30, path:"/"});
+					//console.log( $.cookie("cart") );
+					
+					//判断是否全选了
+					checkAll();
+					
+					//刷新数据
+					refresh();
+				})
+				
+				//-
+				$("#list").on("click", ".down", function(){
+					var index = $(this).index(".down");
+					
+					//改cookie数据
+					var arr = JSON.parse($.cookie("cart"));
+					if (arr[index].num > 1){
+						arr[index].num--;
+					}
+					$.cookie("cart", JSON.stringify(arr), {expires:30, path:"/"});
+					
+					refresh();
+				})
+				
+				//+ 
+				$("#list").on("click", ".up", function(){
+					var index = $(this).index(".up");
+					
+					//改cookie数据
+					var arr = JSON.parse($.cookie("cart"));
+					arr[index].num++; 
+					$.cookie("cart", JSON.stringify(arr), {expires:30, path:"/"});
+					
+					refresh();
+				})
+				
+				
+				//勾选/取消勾选
+				$("#list").on("click", ".check", function(){
+					var index = $(this).index(".check");
+					
+					//取反(勾选或取消勾选)
+					checkedArr[index] = !checkedArr[index];
+					
+					//判断是否全选了
+					checkAll();
+					
+					//刷新数据
+					refresh();
+				})
+				
+				//全选
+				$("#allChecked").click(function(){
+					console.log( $(this).prop("checked") );
+					
+					if ($(this).prop("checked") == true){ //全选了
+						$.each(checkedArr, function(i) {    
+							checkedArr[i] = true;                                           
+						});
+					}
+					else { //取消全选
+						$.each(checkedArr, function(i) {    
+							checkedArr[i] = false;                                           
+						});
+					}
+					
+					//刷新
+					refresh(); 
+				})
+				
+				//删除选中
+				$("#deletePart").click(function(){
+					//获取cookie中的商品
+					var arr = JSON.parse($.cookie("cart"));
+					
+					var newArr = [];
+					var newCheckArr = [];
+					for (var i=0; i<arr.length; i++){
+						if (checkedArr[i] == false){
+							newArr.push(arr[i]);
+							newCheckArr.push(checkedArr[i]);
+						}
+						
+					}
+					checkedArr = newCheckArr;
+					
+					$.cookie("cart", JSON.stringify(newArr), {expires:30, path:"/"});
+					
+					refresh();
+				})
+				
+				//判断是否全选了
+				function checkAll(){
+					var sum = 0;
+					for (var i=0; i<checkedArr.length; i++){
+						sum += checkedArr[i];
+					}
+					
+					if (sum == checkedArr.length){ //是全选
+						$("#allChecked").prop("checked", true); //勾选全选
+					}
+					else {
+						$("#allChecked").prop("checked", false); //不勾选全选
+					}
+				}
+				
+			})
+		</script>
+	</head>
+	<body>
+		全选<input type="checkbox" checked="checked" id="allChecked" />
+		<ul id="list">
+			<!--<li>
+				<input type="checkbox" />
+				<img src="images/1.jpg" />
+				<span>单车</span>
+				<span>1999</span>
+				<input type="button" value="-" />
+				<input id="num" type="text" value="5" />
+				<input type="button" value="+" />
+				<a href="#">删除</a>
+			</li>-->
+			
+		</ul>
+		
+		<a id="deletePart" href="#">删除选中</a>
+		<div >总价: <span id="total">0</span></div>
+	</body>
+</html>

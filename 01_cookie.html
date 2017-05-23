@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript" src="js/jquery-1.12.3.js" ></script>
+		<script type="text/javascript" src="js/jquery.cookie.js" ></script>
+		<script>
+			$(function(){
+				
+				//cookie: 浏览器存储数据的一种技术, 存储大小4K, 存字符串
+				
+				//JS
+				//document.cookie(name, value, expires, path, domain, secure);
+				
+				//$.cookie(name, value, {expires:7, path:"/"});
+				
+				
+				//数据操作: 增删改查
+				//增: 添加cookie
+				$.cookie("name", "zhangsan", {expires:7, path:"/"});
+				console.log( $.cookie("name") ); //zhangsan, 查找cookie
+				
+				//修改cookie
+				$.cookie("name", "lisi", {expires:7, path:"/"});
+				console.log( $.cookie("name") );  //lisi
+				
+				//自动URI编码
+				$.cookie("name1", "张三", {expires:7, path:"/"});
+				console.log( $.cookie("name1") ); //张三, 获取时自动解码
+				
+				//删除cookie
+				//name1: 是我们要删除的cookie,
+				//expires: 过期时间要设置为0或者负数
+				$.cookie("name1", "", {expires:0, path:"/"});
+				console.log( $.cookie("name1") );  //undefined
+				
+				
+				//存储对象
+				var person = {
+					name: "张三",
+					age: 33,
+					sex: "女"
+				}
+				
+				//存储字符串
+				//获取出来也是字符串
+//				$.cookie("person", person, {expires:7, path:"/"});
+//				console.log( $.cookie("person") ); //"[object Object]"
+//				console.log(typeof $.cookie("person") ); //string
+				
+				
+				//JSON序列化: 把对象转换成json字符串
+				//JSON解析: 把json字符串转换成对象(或数组)
+				var str = JSON.stringify(person);
+				console.log(str); //"{"name":"张三","age":33,"sex":"女"}"
+				
+				//存储json字符串
+				$.cookie("person", str, {expires:7, path:"/"});
+				console.log( $.cookie("person") ); //"{"name":"张三","age":33,"sex":"女"}"
+				
+				//JSON解析
+				var obj = JSON.parse( $.cookie("person") );
+				console.log(obj.name); //张三
+				console.log(obj.age); //33
+				console.log(obj.sex); //女
+				
+				
+				//存储数组
+				var arr = [];
+				arr.push({name:"张三",age:33});
+				arr.push({name:"李四",age:44});
+				arr.push({name:"王五",age:55});
+				
+				//JSON序列化
+				var str = JSON.stringify(arr);
+				
+				//存储到cookie
+				$.cookie("users", str, {expires:30, path:"/"});
+				console.log( $.cookie("users") );
+				//"[{"name":"张三","age":33},{"name":"李四","age":44},{"name":"王五","age":55}]"
+				
+				//获取cookie
+				var arr = JSON.parse( $.cookie("users") ); 
+				console.log(arr); //[[object Object],[object Object],[object Object]]
+				
+				
+				
+			})
+			
+		</script>
+		
+	</head>
+	<body>
+	</body>
+</html>
